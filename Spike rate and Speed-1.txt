@@ -1,0 +1,40 @@
+clc;clear;
+
+time=300; 
+
+[filename, pathname]=uigetfile('*.abf*','select abf file');
+cd(pathname);
+[bu.data,si,bu.metadata] = abfload(filename);
+str=bu.metadata.recChNames;
+[s,v]=listdlg('PromptString','select channel：','SelectionMode',...
+    'multipe','ListSize',[200,300],'liststring',str);
+c.num=length(s);[d1,d2,d3]=size(bu.data);x=[0:time/(d1*d3):time];x=x(2:end);
+figure()
+for i=1:c.num
+    y=bu.data(:,s(i),:);
+    c.y(:,i)=reshape(y,[d1*d3,1]);
+    subplot(3,1,i)
+    plot(x,c.y(:,i))
+    ylabel(bu.metadata.recChUnits(s(i)));
+end
+xlabel('（s）');
+xticks(0:1:300);
+
+
+[f1 p1]=uigetfile('*.txt','select a text file');
+cd(p1);
+[a,b,c,d,e,f] = textread(f1,'%s%s%s%s%s%f','headerlines',1);
+k(1)=0
+for i=1:length(f)-1
+    k(i+1)=f(i+1)+k(i);
+end
+k=k/1000;
+sh=floor(max(k))+1
+bin=0.1; 
+kbins=0:bin:sh;
+h=hist(k,kbins);
+subplot(3,1,3)
+plot(h)
+ylabel('Speed');
+xlabel('Time (s)')
+xticks(0:1:300);

@@ -1,0 +1,105 @@
+clc;
+clear all;
+bin=0.1; 
+lat=0; 
+repeat=30; 
+[f1 p1]=uigetfile('*.txt','select a text file');
+cd(p1);
+[a,b,c,d,e,f] = textread(f1,'%s%s%s%s%s%f','headerlines',1);
+k(1)=0;
+if sum(f)<450000
+    f(length(f)+1)=450000-sum(f);
+else
+end
+for i=1:length(f)-1
+    k(i+1)=f(i+1)+k(i);
+end
+k=k/1000;
+sh=floor(max(k))+1;
+kbins=0:bin:sh;
+h=hist(k,kbins);
+h=0.02*h/bin; 
+x=[bin:bin:length(h)*bin];
+figure()
+plot(x,h)
+ylabel('Speed');
+xlabel('Time (s)')
+if lat==0
+    for i=1:30;
+     if i>1
+     www(i,:)=h((i-1)*(repeat/bin)-5/bin:(i-1)*(repeat/bin)+15/bin);
+     else
+       www(i,1:5/bin)=  zeros(1,5/bin); 
+     www(i,5/bin+1:20/bin+1)=h((i-1)*(repeat/bin)+1:(i-1)*(repeat/bin)+15/bin+1);
+     end
+    end
+else
+for i=1:30;
+    www(i,:)=h((i-1)*(repeat/bin)-5/bin+lat/bin:(i-1)*(repeat/bin)+15/bin+lat/bin);
+end
+end
+aaa=www;[m n]=size(aaa); aaa(m+1,n+1)=0;
+figure()
+pcolor(aaa)
+shading flat
+axis off
+hold on 
+line([5/bin,5/bin],[0,16],'Color','r','LineWidth',0.5)
+
+laser(1,:)=www(1,:);
+laser(2,:)=www(4,:);
+laser(3,:)=www(8,:);
+laser(4,:)=www(12,:);
+laser(5,:)=www(15,:);
+laser(6,:)=www(16,:);
+laser(7,:)=www(19,:);
+laser(8,:)=www(23,:);
+laser(9,:)=www(27,:);
+laser(10,:)=www(30,:);
+
+
+laseroff1(1,:)=www(2,:);
+laseroff1(2,:)=www(6,:);
+laseroff1(3,:)=www(7,:);
+laseroff1(4,:)=www(11,:);
+laseroff1(5,:)=www(13,:);
+laseroff1(6,:)=www(17,:);
+laseroff1(7,:)=www(21,:);
+laseroff1(8,:)=www(22,:);
+laseroff1(9,:)=www(26,:);
+laseroff1(10,:)=www(29,:);
+
+laseroff2(1,:)=www(3,:);
+laseroff2(2,:)=www(5,:);
+laseroff2(3,:)=www(9,:);
+laseroff2(4,:)=www(10,:);
+laseroff2(5,:)=www(14,:);
+laseroff2(6,:)=www(18,:);
+laseroff2(7,:)=www(20,:);
+laseroff2(8,:)=www(24,:);
+laseroff2(9,:)=www(25,:);
+laseroff2(10,:)=www(28,:);
+
+lasermean=mean(laser);
+
+aaa=laser;[m n]=size(aaa); aaa(m+1,n+1)=0;
+figure()
+pcolor(aaa)
+shading flat
+axis off
+hold on 
+line([5/bin,5/bin],[0,16],'Color','r','LineWidth',0.5)
+aaa=laseroff1;[m n]=size(aaa); aaa(m+1,n+1)=0;
+figure()
+pcolor(aaa)
+shading flat
+axis off
+hold on 
+line([5/bin,5/bin],[0,16],'Color','r','LineWidth',0.5)
+aaa=laseroff2;[m n]=size(aaa); aaa(m+1,n+1)=0;
+figure()
+pcolor(aaa)
+shading flat
+axis off
+hold on 
+line([5/bin,5/bin],[0,16],'Color','r','LineWidth',0.5)

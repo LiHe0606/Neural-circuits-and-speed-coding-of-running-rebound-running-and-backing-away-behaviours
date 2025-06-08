@@ -1,0 +1,443 @@
+clear;
+bin=0.1; 
+lat=0; 
+repeat=30; 
+[f1,p1]=uigetfile('*.txt');
+cd(p1);
+[a,b,c,d,e,f] = textread(f1,'%s%s%s%s%s%f','headerlines',1);
+if sum(f)-lat*1000<900000
+f(length(f)+1)=960000-sum(f);
+else
+end
+bb=cell2mat(b);
+bbb=str2num(bb);
+bc=zeros(length(bbb),1);
+for i=1:length(bbb)-1
+bc(i)=bbb(i+1)-bbb(i);
+end
+k(1)=0;
+for i=1:length(f)-1
+k(i+1)=f(i+1)+k(i);
+end
+k=k/1000;
+sh=floor(max(k))+1;
+kbins=0:bin:sh;
+h=hist(k,kbins);
+kk(1)=sum(h(1:h(1)));dd=h(1);
+for i=1:length(h)-1
+kk(i+1)=sum(bc(dd+1:dd+h(i+1)));
+dd=dd+h(i+1);
+end
+h=0.02*h/bin; %% speed cm/s
+x=[bin:bin:length(h)*bin];
+figure()
+plot(x,h)
+title('original')
+xlabel('Time (s)')
+ylabel('Speed')
+hd=zeros(1,length(kk));
+for i=1:length(kk)
+if kk(i)<0 || kk(i)==0
+hd(i)=1;
+else
+hd(i)=-1;
+end
+end
+bc1=find(hd<0);
+bc2=find(hd>0);
+%% plan-1
+htp=h;htn=h;
+for i=1:length(bc1)
+htp(bc1(i))=NaN;
+if i>1
+if bc1(i)-bc1(i-1)>1
+htp(bc1(i))=h(bc1(i));
+else
+end
+end
+if i<length(bc1)
+if bc1(i+1)-bc1(i)>1
+htp(bc1(i))=h(bc1(i));
+else
+end
+end
+end
+for i=1:length(bc2)
+htn(bc2(i))=NaN;
+if i>1
+if bc2(i)-bc2(i-1)>1
+htn(bc2(i))=h(bc2(i));
+else
+end
+end
+if i<length(bc2)
+if bc2(i+1)-bc2(i)>1
+htn(bc2(i))=h(bc2(i));
+else
+end
+end
+end
+figure()
+plot(x,htn,'Color','r')
+title('plan-1')
+xlabel('Time (s)')
+ylabel('Speed')
+hold on
+plot(x,htp,'Color',[0 0.4470 0.7410])
+%% plan-2
+h8=h.*hd;
+htp=h8;htn=h8;
+for i=1:length(bc1)
+htp(bc1(i))=NaN;
+if i>1
+if bc1(i)-bc1(i-1)>1
+htp(bc1(i))=h8(bc1(i));
+else
+end
+end
+if i<length(bc1)
+if bc1(i+1)-bc1(i)>1
+htp(bc1(i))=h8(bc1(i));
+else
+end
+end
+end
+for i=1:length(bc2)
+htn(bc2(i))=NaN;
+if i>1
+if bc2(i)-bc2(i-1)>1
+htn(bc2(i))=h8(bc2(i));
+else
+end
+end
+if i<length(bc2)
+if bc2(i+1)-bc2(i)>1
+htn(bc2(i))=h8(bc2(i));
+else
+end
+end
+end
+figure()
+plot(x,htn,'Color','r')
+title('plan-2')
+xlabel('Time (s)')
+ylabel('Speed')
+hold on
+plot(x,htp,'Color',[0 0.4470 0.7410])
+%% Negative speed
+if lat==0
+for i=1:30;
+if i>1
+www(i,:)=h8((i-1)*(repeat/bin)-5/bin:(i-1)*(repeat/bin)+25/bin);
+else
+www(i,1:5/bin)=  zeros(1,5/bin);
+www(i,5/bin+1:30/bin+1)=h8((i-1)*(repeat/bin)+1:(i-1)*(repeat/bin)+25/bin+1);
+end
+end
+else
+for i=1:30;
+www(i,:)=h8((i-1)*(repeat/bin)-5/bin+lat/bin:(i-1)*(repeat/bin)+25/bin+lat/bin);
+end
+end
+aaa=www;[m n]=size(aaa); aaa(m+1,n+1)=0;
+cmax=max([max(max(aaa)),-min(min(aaa))]);
+figure()
+pcolor(aaa)
+shading flat
+axis off
+hold on
+line([5/bin,5/bin],[0,31],'Color','r','LineWidth',0.5)
+caxis([-cmax cmax])
+colorbar
+
+laser(1,:)=www(1,:);
+laser(2,:)=www(4,:);
+laser(3,:)=www(8,:);
+laser(4,:)=www(12,:);
+laser(5,:)=www(15,:);
+laser(6,:)=www(16,:);
+laser(7,:)=www(19,:);
+laser(8,:)=www(23,:);
+laser(9,:)=www(27,:);
+laser(10,:)=www(30,:);
+
+laseroff1(1,:)=www(2,:);
+laseroff1(2,:)=www(6,:);
+laseroff1(3,:)=www(7,:);
+laseroff1(4,:)=www(11,:);
+laseroff1(5,:)=www(13,:);
+laseroff1(6,:)=www(17,:);
+laseroff1(7,:)=www(21,:);
+laseroff1(8,:)=www(22,:);
+laseroff1(9,:)=www(26,:);
+laseroff1(10,:)=www(29,:);
+
+laseroff2(1,:)=www(3,:);
+laseroff2(2,:)=www(5,:);
+laseroff2(3,:)=www(9,:);
+laseroff2(4,:)=www(10,:);
+laseroff2(5,:)=www(14,:);
+laseroff2(6,:)=www(18,:);
+laseroff2(7,:)=www(20,:);
+laseroff2(8,:)=www(24,:);
+laseroff2(9,:)=www(25,:);
+laseroff2(10,:)=www(28,:);
+
+aaa=laser;[m n]=size(aaa); aaa(m+1,n+1)=0;
+figure()
+pcolor(aaa)
+shading flat
+axis off
+hold on
+line([5/bin,5/bin],[0,16],'Color','r','LineWidth',0.5)
+caxis([-cmax cmax])
+colorbar
+
+aaa=laseroff1;[m n]=size(aaa); aaa(m+1,n+1)=0;
+figure()
+pcolor(aaa)
+shading flat
+axis off
+hold on
+line([5/bin,5/bin],[0,16],'Color','r','LineWidth',0.5)
+caxis([-cmax cmax])
+colorbar
+
+aaa=laseroff2;[m n]=size(aaa); aaa(m+1,n+1)=0;
+figure()
+pcolor(aaa)
+shading flat
+axis off
+hold on
+line([5/bin,5/bin],[0,16],'Color','r','LineWidth',0.5)
+caxis([-cmax cmax])
+colorbar
+
+lasermean=mean(laser);lasersem=std(laser)/(sqrt(size(laser,1)));
+laseroff1mean=mean(laseroff1);laseroff1sem=std(laseroff1)/(sqrt(size(laseroff1,1)));
+laseroff2mean=mean(laseroff2);laseroff2sem=std(laseroff2)/(sqrt(size(laseroff2,1)));
+%% No Negative speed
+www=[];
+if lat==0
+for i=1:30;
+if i>1
+www(i,:)=h((i-1)*(repeat/bin)-5/bin:(i-1)*(repeat/bin)+25/bin);
+else
+www(i,1:5/bin)=  zeros(1,5/bin);
+www(i,5/bin+1:30/bin+1)=h((i-1)*(repeat/bin)+1:(i-1)*(repeat/bin)+25/bin+1);
+end
+end
+else
+for i=1:30;
+www(i,:)=h((i-1)*(repeat/bin)-5/bin+lat/bin:(i-1)*(repeat/bin)+25/bin+lat/bin);
+end
+end
+aaa=www;[m n]=size(aaa); aaa(m+1,n+1)=0;
+cmax=max(max(aaa));
+figure()
+pcolor(aaa)
+shading flat
+axis off
+hold on
+line([5/bin,5/bin],[0,31],'Color','r','LineWidth',0.5)
+caxis([0 cmax])
+colorbar
+
+laser(1,:)=www(1,:);
+laser(2,:)=www(4,:);
+laser(3,:)=www(8,:);
+laser(4,:)=www(12,:);
+laser(5,:)=www(15,:);
+laser(6,:)=www(16,:);
+laser(7,:)=www(19,:);
+laser(8,:)=www(23,:);
+laser(9,:)=www(27,:);
+laser(10,:)=www(30,:);
+
+laseroff1(1,:)=www(2,:);
+laseroff1(2,:)=www(6,:);
+laseroff1(3,:)=www(7,:);
+laseroff1(4,:)=www(11,:);
+laseroff1(5,:)=www(13,:);
+laseroff1(6,:)=www(17,:);
+laseroff1(7,:)=www(21,:);
+laseroff1(8,:)=www(22,:);
+laseroff1(9,:)=www(26,:);
+laseroff1(10,:)=www(29,:);
+
+laseroff2(1,:)=www(3,:);
+laseroff2(2,:)=www(5,:);
+laseroff2(3,:)=www(9,:);
+laseroff2(4,:)=www(10,:);
+laseroff2(5,:)=www(14,:);
+laseroff2(6,:)=www(18,:);
+laseroff2(7,:)=www(20,:);
+laseroff2(8,:)=www(24,:);
+laseroff2(9,:)=www(25,:);
+laseroff2(10,:)=www(28,:);
+
+aaa=laser;[m n]=size(aaa); aaa(m+1,n+1)=0;
+figure()
+pcolor(aaa)
+shading flat
+axis off
+hold on
+line([5/bin,5/bin],[0,16],'Color','r','LineWidth',0.5)
+caxis([0 cmax])
+colorbar
+
+aaa=laseroff1;[m n]=size(aaa); aaa(m+1,n+1)=0;
+figure()
+pcolor(aaa)
+shading flat
+axis off
+hold on
+line([5/bin,5/bin],[0,16],'Color','r','LineWidth',0.5)
+caxis([0 cmax])
+colorbar
+
+aaa=laseroff2;[m n]=size(aaa); aaa(m+1,n+1)=0;
+figure()
+pcolor(aaa)
+shading flat
+axis off
+hold on
+line([5/bin,5/bin],[0,16],'Color','r','LineWidth',0.5)
+caxis([0 cmax])
+colorbar
+
+lasermean1=mean(laser);lasersem1=std(laser)/(sqrt(size(laser,1)));
+laseroff1mean1=mean(laseroff1);laseroff1sem1=std(laseroff1)/(sqrt(size(laseroff1,1)));
+laseroff2mean1=mean(laseroff2);laseroff2sem1=std(laseroff2)/(sqrt(size(laseroff2,1)));
+%%
+lasern=lasermean;laseroff1n=laseroff1mean;laseroff2n=laseroff2mean;
+lasern1=lasermean1;lightn1=lightmean1;airn1=airmean1;
+xs=[-5:0.1:25];
+%% laser
+figure()
+plot(xs,lasermean1,'LineWidth',2)
+title('laser')
+xlabel('Time (s)')
+ylabel('Speed')
+hold on
+hh=fill([xs,fliplr(xs)],[lasermean1-lasersem1,fliplr(lasermean1+lasersem1)]...
+,'b','EdgeColor','none');
+set(hh,'edgealpha',0,'facealpha',0.05)
+
+for i=1:length(lasern1)
+if lasern(i)>0 
+lasern1(i)=NaN;
+else
+end
+end
+figure()
+plot(xs,lasermean1,xs,lasern1,'LineWidth',2)
+title('laser')
+xlabel('Time (s)')
+ylabel('Speed')
+hold on
+hh=fill([xs,fliplr(xs)],[lasermean1-lasersem1,fliplr(lasermean1+lasersem1)]...
+,'b','EdgeColor','none');
+set(hh,'edgealpha',0,'facealpha',0.05)
+
+for i=1:length(lasern)
+if lasern(i)>0 
+lasern(i)=NaN;
+else
+end
+end
+figure()
+plot(xs,lasermean,xs,lasern,'LineWidth',2)
+title('laser')
+xlabel('Time (s)')
+ylabel('Speed')
+hold on
+hh=fill([xs,fliplr(xs)],[lasermean-lasersem,fliplr(lasermean+lasersem)]...
+,'b','EdgeColor','none');
+set(hh,'edgealpha',0,'facealpha',0.05)
+
+%% laseroff1
+figure()
+plot(xs,laseroff1mean1,'LineWidth',2)
+title('laseroff1')
+xlabel('Time (s)')
+ylabel('Speed')
+hold on
+hh=fill([xs,fliplr(xs)],[laseroff1mean1-laseroff1sem1,fliplr(laseroff1mean1+laseroff1sem1)]...
+,'b','EdgeColor','none');
+set(hh,'edgealpha',0,'facealpha',0.05)
+
+for i=1:length(laseroff1n1)
+if laseroff1n(i)>0 
+laseroff1n1(i)=NaN;
+else
+end
+end
+figure()
+plot(xs,laseroff1mean1,xs,laseroff1n1,'LineWidth',2)
+title('laseroff1')
+xlabel('Time (s)')
+ylabel('Speed')
+hold on
+hh=fill([xs,fliplr(xs)],[laseroff1mean1-laseroff1sem1,fliplr(laseroff1mean1+laseroff1sem1)]...
+,'b','EdgeColor','none');
+set(hh,'edgealpha',0,'facealpha',0.05)
+
+for i=1:length(laseroff1n)
+if laseroff1n(i)>0 
+laseroff1n(i)=NaN;
+else
+end
+end
+figure()
+plot(xs,laseroff1mean,xs,laseroff1n,'LineWidth',2)
+title('laseroff1')
+xlabel('Time (s)')
+ylabel('Speed')
+hold on
+hh=fill([xs,fliplr(xs)],[laseroff1mean-laseroff1sem,fliplr(laseroff1mean+laseroff1sem)]...
+,'b','EdgeColor','none');
+set(hh,'edgealpha',0,'facealpha',0.05)
+
+%% laseroff2
+figure()
+plot(xs,laseroff2mean1,'LineWidth',2)
+title('laseroff2')
+xlabel('Time (s)')
+ylabel('Speed')
+hold on
+hh=fill([xs,fliplr(xs)],[laseroff2mean1-laseroff2sem1,fliplr(laseroff2mean1+laseroff2sem1)]...
+    ,'b','EdgeColor','none');
+set(hh,'edgealpha',0,'facealpha',0.05)
+
+for i=1:length(laseroff2n1)
+if laseroff2n(i)>0 
+laseroff2n1(i)=NaN;
+else
+end
+end
+figure()
+plot(xs,laseroff2mean1,xs,laseroff2n1,'LineWidth',2)
+title('laseroff2')
+xlabel('Time (s)')
+ylabel('Speed')
+hold on
+hh=fill([xs,fliplr(xs)],[laseroff2mean1-laseroff2sem1,fliplr(laseroff2mean1+laseroff2sem1)]...
+    ,'b','EdgeColor','none');
+set(hh,'edgealpha',0,'facealpha',0.05)
+
+for i=1:length(laseroff2n)
+if laseroff2n(i)>0 
+laseroff2n(i)=NaN;
+else
+end
+end
+figure()
+plot(xs,laseroff2mean,xs,laseroff2n,'LineWidth',2)
+title('laseroff2')
+xlabel('Time (s)')
+ylabel('Speed')
+hold on
+hh=fill([xs,fliplr(xs)],[laseroff2mean-laseroff2sem,fliplr(laseroff2mean+laseroff2sem)]...
+    ,'b','EdgeColor','none');
+set(hh,'edgealpha',0,'facealpha',0.05)

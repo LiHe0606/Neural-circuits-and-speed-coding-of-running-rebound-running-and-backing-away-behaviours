@@ -1,0 +1,10 @@
+spike = [];
+bin=10;
+n=hist(spike,[0:bin:3000]);
+vq1 = interp1([0:bin:3000],n,[0:1:3000]);
+figure()
+subplot(3,1,1)
+plot(vq1)
+xlim([0 3000])
+ylabel('Hz')
+hold on
